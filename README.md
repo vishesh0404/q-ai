@@ -20,6 +20,7 @@ This is a Spring Boot application built with Gradle and Java 21, utilizing the [
 
 ## 📁 Project Structure
 
+```bash
 spring-ai-chatbot/
 ├── src/
 │ ├── main/
@@ -30,6 +31,7 @@ spring-ai-chatbot/
 ├── settings.gradle # Gradle settings
 └── README.md # Project documentation
 
+```
 
 ---
 
