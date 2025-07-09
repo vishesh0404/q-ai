@@ -50,7 +50,18 @@ public class ChatService {
                 "- dob: date\n" +
                 "- salary: text\n\n" +
                 "Only respond with a valid supported SQL string query without any additional explanation, markdown and other information.\n" +
-                "Question: " + userInput;
+                "Question: " + userInput+ "\n\n"+
+                "Guidelines for SQL generation:\n" +
+                "1. Perform case-insensitive comparisons using `ILIKE` instead of `=`, especially for string-based columns (e.g., names, titles).\n" +
+                "2. Handle partial name matches using wildcards (`%`) where appropriate. For example, if the user asks about \"Mark\", generate:  \n" +
+                "   `WHERE name ILIKE '%Mark%'`\n" +
+                "3. Prefer `LIMIT 1` when querying for a single record like salary, email, etc.\n" +
+                "4. Use table and column names exactly as provided in the schema.\n" +
+                "5. Avoid joins unless explicitly needed.\n" +
+                "6. Do not hallucinate any column/table names—use only what's in the schema.\n" +
+                "7. Return only the SQL query. Do not explain or comment.\n" +
+                "\n" +
+                "Important: Ensure the SQL is valid and can be directly executed on a PostgreSQL/MySQL database.";
 
     }
 
@@ -64,7 +75,11 @@ public class ChatService {
         // Prompt ChatModel to summarize
         Prompt explanationPrompt = new Prompt(List.of(
                 new SystemMessage("You are a helpful assistant that explains database query results in natural language."),
-                new UserMessage("User question: " + userQuestion + "\n\nSQL Query: " + sqlQuery + "\n\nQuery Result:\n" + resultBuilder)
+                new UserMessage("User question: " + userQuestion + "\n\nSQL Query: " + sqlQuery + "\n\nQuery Result:\n" + resultBuilder),
+                new SystemMessage("Write a concise and accurate answer based only on the result above.\n" +
+                        "- Do not include SQL.\n" +
+                        "- Do not make assumptions.\n" +
+                        "- Only use data in the result.")
         ));
 
         return chatModel.call(explanationPrompt).getResult().getOutput().getText();
