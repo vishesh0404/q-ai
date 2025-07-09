@@ -79,7 +79,17 @@ public class ChatService {
                 new SystemMessage("Write a concise and accurate answer based only on the result above.\n" +
                         "- Do not include SQL.\n" +
                         "- Do not make assumptions.\n" +
-                        "- Only use data in the result.")
+                        "- Only use data in the result."),
+                new SystemMessage("Your job is to:\n" +
+                        "1. Understand exactly what the question is asking for (e.g., name, count, date, etc.).\n" +
+                        "2. If the result is empty or no matching data is found, reply politely in plain English.\n" +
+                        "   Example: “I couldn't find any information. It's possible that the specified item doesn't exist or there is no data available.”\n" +
+                        "3. If data exists, provide only the **relevant** information needed to answer the question.\n" +
+                        "4. Do **not** include any extra details not directly asked for.\n" +
+                        "5. Do **not** repeat column headers or format the output like a table.\n" +
+                        "6. Summarize the result clearly in natural, conversational English.\n" +
+                        "\n" +
+                        "Return only the final answer text — no reasoning, no SQL, no internal notes.")
         ));
 
         return chatModel.call(explanationPrompt).getResult().getOutput().getText();
