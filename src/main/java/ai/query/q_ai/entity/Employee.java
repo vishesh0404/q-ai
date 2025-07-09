@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "employee")
@@ -13,22 +14,22 @@ import java.util.Date;
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "employee_id")
     private String employeeId;
 
-    @Column
+    @Column(name = "name")
     private String name;
 
     @Column(name = "project_name")
     private String projectName;
 
-    @Column
+    @Column(name = "dob")
     private Date dob;
 
-    @Column
+    @Column(name = "salary")
     private String salary;
 
 }

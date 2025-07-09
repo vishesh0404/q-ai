@@ -16,7 +16,7 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String getChatResponse(@RequestParam("prompt") String prompt){
-        return service.getChatResponse(prompt);
+        return service.getHumanReadableResponse(prompt);
     }
 
 }
