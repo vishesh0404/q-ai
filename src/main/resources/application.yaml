@@ -1,9 +1,9 @@
 spring:
   datasource:
     driverClassName: ${JDBC_DRIVER:org.postgresql.Driver}
-    url: ${QUERY_AI_DB_URL}
-    username: ${QUERY_AI_DB_USERNAME}
-    password: ${QUERY_AI_DB_PASSWORD}
+    url: ${QUERY_AI_DB_URL:jdbc:postgresql://localhost:5432/employeedb}
+    username: ${QUERY_AI_DB_USERNAME:aiquery}
+    password: ${QUERY_AI_DB_PASSWORD:AI@Query2025}
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: 5
@@ -23,12 +23,15 @@ spring:
       data-locations: classpath:data.sql
 
   ai:
+    mistralai:
+      api-key: ${MISTRAL_API_KEY:default}
     openai:
       api-key: ${OPENROUTER_API_KEY}
       base_url: ${OPENAI_BASE_URL:https://openrouter.ai/api}
       chat:
         model: deepseek/deepseek-r1:free
-        #model: deepseek/deepseek-chat
+        client:
+          enabled: true
 
 logging:
   level:
