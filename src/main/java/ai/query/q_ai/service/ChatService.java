@@ -24,44 +24,83 @@ public class ChatService {
 
     public String getHumanReadableResponse(String userQuestion) {
         // Step 1: Generate SQL query
-        String sqlPrompt = createPrompt(userQuestion);
-        String sqlQuery = chatModel.call(new Prompt(sqlPrompt)).getResult().getOutput().getText().trim();
+        String sqlPrompt = createPrompt(userQuestion).trim();
+
+        String chatResponse = chatModel.call(new Prompt(sqlPrompt)).getResult().getOutput().getText().trim();
+
+        if(!chatResponse.startsWith("SELECT") && !chatResponse.startsWith("select")){
+            return chatResponse;
+        }
 
         // Step 2: Execute SQL query
         List<Map<String, Object>> results;
         try {
-            results = jdbcTemplate.queryForList(sqlQuery);
+            results = jdbcTemplate.queryForList(chatResponse);
         } catch (Exception e) {
             return "There was an error while executing the SQL: " + e.getMessage();
         }
 
         // Step 3: Convert result to natural language
-        return convertResultToHumanText(userQuestion, sqlQuery, results);
+        return convertResultToHumanText(userQuestion, chatResponse, results);
     }
 
     private String createPrompt(String userInput) {
-        return "You are an expert postgres SQL generator. Given a user question and a database schema, generate a valid SQL query.\n\n" +
-                "Here is the Schema:\n" +
+//        return "You are an expert postgres SQL generator. Given a user question and a database schema, generate a valid SQL query.\n\n" +
+//                "Here is the Schema:\n" +
+//                "Table: Employee\n" +
+//                "- id: int\n" +
+//                "- employee_id: text\n" +
+//                "- name: text\n" +
+//                "- project_name: text\n" +
+//                "- dob: date\n" +
+//                "- salary: text\n\n" +
+//                "Question: " + userInput+ "\n\n"+
+//                "Guidelines for SQL generation:\n" +
+//                "First, check if the question is relevant to the datasource and can be answered using the available data.\n" +
+//                "1. If yes, generate a valid SQL query using:\n" +
+//                "- Perform case-insensitive comparisons using `ILIKE` instead of `=`, especially for string-based columns (e.g., names, titles).\n" +
+//                "- Handle partial name matches using wildcards (`%`) where appropriate. For example, if the user asks about \"Mark\", generate:  \n" +
+//                "   `WHERE name ILIKE '%Mark%'`\n" +
+//                "- Prefer `LIMIT 1` when querying for a single record like salary, email, etc.\n" +
+//                "- Use table and column names exactly as provided in the schema.\n" +
+//                "- Avoid joins unless explicitly needed.\n" +
+//                "- Do not hallucinate any column/table names—use only what's in the schema.\n" +
+//                "- Important: Ensure the SQL is valid and can be directly executed on a PostgreSQL/MySQL database.\n" +
+//                "- Only respond with a valid supported SQL string query without any additional explanation, markdown and other information.\n" +
+//                "\n" +
+//                "2. If the question is **general knowledge** (e.g., “What is 4 + 4?”, “What is the capital of Japan?”), answer it directly in plain English without using SQL.\n" +
+////                "3. If the question is **small talk or not related to the schema or general knowledge** (e.g., “Hi”, “How are you?”, “Tell me a joke”), return a polite message like:\n" +
+////                "   - “This doesn’t seem related to the database. Let me know if you'd like to ask about something specific.\n" +
+//                "";
+
+        return "\n" +
+                "You are a helpful assistant that generates SQL queries and answers data-related questions using the given database schema.\n" +
+                "If the question doesn't relate to the schema, reply politely or answer general knowledge queries in plain English.\n" +
+                "\n" +
+                "Here is the Database Schema:\n" +
+                "---\n" +
                 "Table: Employee\n" +
                 "- id: int\n" +
                 "- employee_id: text\n" +
                 "- name: text\n" +
                 "- project_name: text\n" +
                 "- dob: date\n" +
-                "- salary: text\n\n" +
-                "Only respond with a valid supported SQL string query without any additional explanation, markdown and other information.\n" +
-                "Question: " + userInput+ "\n\n"+
-                "Guidelines for SQL generation:\n" +
-                "1. Perform case-insensitive comparisons using `ILIKE` instead of `=`, especially for string-based columns (e.g., names, titles).\n" +
-                "2. Handle partial name matches using wildcards (`%`) where appropriate. For example, if the user asks about \"Mark\", generate:  \n" +
-                "   `WHERE name ILIKE '%Mark%'`\n" +
-                "3. Prefer `LIMIT 1` when querying for a single record like salary, email, etc.\n" +
-                "4. Use table and column names exactly as provided in the schema.\n" +
-                "5. Avoid joins unless explicitly needed.\n" +
-                "6. Do not hallucinate any column/table names—use only what's in the schema.\n" +
-                "7. Return only the SQL query. Do not explain or comment.\n" +
-                "\n" +
-                "Important: Ensure the SQL is valid and can be directly executed on a PostgreSQL/MySQL database.";
+                "- salary: text\n" +
+                "---\n" +
+                "Instructions:\n" +
+                "1. If the question can be answered using the schema, return a valid SQL query string only:\n" +
+                "Use ILIKE (PostgreSQL) or LOWER(column) LIKE LOWER(...) (MySQL) for case-insensitive string matches\n" +
+                "Use % wildcards for partial name matches (e.g., '%Mark%')\n" +
+                "Use LIMIT 1 for single-value lookups (e.g., salary, DOB)\n" +
+                "Only use fields/tables from the schema — no assumptions or extra columns\n" +
+                "Avoid joins unless explicitly required\n" +
+                "Ensure SQL works for both PostgreSQL and MySQL\n" +
+                "Return only the SQL query string — no markdown, comments, or extra text\n" +
+                "2. If the question is general knowledge (e.g., \"What is 4 + 4?\", \"What is the capital of Japan?\") — answer it clearly in plain English\n" +
+                "3. If the question is greeting, small talk, or unrelated (e.g., \"Hi\", \"Tell me a joke\") — answer it\n" +
+//                "“Hi there! I'm here to help you with data from the Employee database. Feel free to ask any question about employees, salaries, or projects.”\n" +
+//                "\n" +
+                "Here is the User Question: "+userInput;
 
     }
 
