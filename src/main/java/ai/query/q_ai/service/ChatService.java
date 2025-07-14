@@ -79,13 +79,14 @@ public class ChatService {
                 "\n" +
                 "Here is the Database Schema:\n" +
                 "---\n" +
-                "Table: Employee\n" +
-                "- id: int\n" +
-                "- employee_id: text\n" +
-                "- name: text\n" +
-                "- project_name: text\n" +
-                "- dob: date\n" +
-                "- salary: text\n" +
+                getSqlSchema() +
+//                "Table: Employee\n" +
+//                "- id: int\n" +
+//                "- employee_id: text\n" +
+//                "- name: text\n" +
+//                "- project_name: text\n" +
+//                "- dob: date\n" +
+//                "- salary: text\n" +
                 "---\n" +
                 "Instructions:\n" +
                 "1. If the question can be answered using the schema, return a valid SQL query string only:\n" +
@@ -95,6 +96,7 @@ public class ChatService {
                 "Only use fields/tables from the schema — no assumptions or extra columns\n" +
                 "Avoid joins unless explicitly required\n" +
                 "Ensure SQL works for both PostgreSQL and MySQL\n" +
+                //"If returning salary, show it in INDIAN currency" +
                 "Return only the SQL query string — no markdown, comments, or extra text\n" +
                 "2. If the question is general knowledge (e.g., \"What is 4 + 4?\", \"What is the capital of Japan?\") — answer it clearly in plain English\n" +
                 "3. If the question is greeting, small talk, or unrelated (e.g., \"Hi\", \"Tell me a joke\") — answer it\n" +
@@ -132,6 +134,36 @@ public class ChatService {
         ));
 
         return chatModel.call(explanationPrompt).getResult().getOutput().getText();
+    }
+
+    public String getSqlSchema(){
+        return "CREATE TABLE employees (\n" +
+                "    id UUID PRIMARY KEY,\n" +
+                "    employee_id VARCHAR(50),\n" +
+                "    name VARCHAR(100),\n" +
+                "    project_name VARCHAR(100),\n" +
+                "    dob DATE,\n" +
+                "    doj DATE,\n" +
+                "    salary DECIMAL(10, 2),\n" +
+                "    designation VARCHAR(100),\n" +
+                "    chapter VARCHAR(100),\n" +
+                "    departement VARCHAR(100)\n" +
+                "    bench_status boolean\n" +
+                ");\n"+
+                "CREATE TABLE projects (\n" +
+                "    id UUID PRIMARY KEY,\n" +
+                "    project_id VARCHAR(50) UNIQUE NOT NULL,\n" +
+                "    project_name VARCHAR(150) NOT NULL,\n" +
+                "    start_date DATE,\n" +
+                "    end_date DATE\n" +
+                "); \n"+
+                "CREATE TABLE virtual_machines (\n" +
+                "    id UUID PRIMARY KEY,\n" +
+                "    machine_id VARCHAR(100) UNIQUE NOT NULL,\n" +
+                "    machine_name VARCHAR(100) NOT NULL,\n" +
+                "    configuration TEXT NOT NULL,\n" +
+                "    is_active BOOLEAN\n" +
+                ");";
     }
 
 //    public String getChatResponse(String prompt){
